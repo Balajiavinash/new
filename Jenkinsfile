@@ -1,9 +1,5 @@
 pipeline {
     agent any
-    environment {
-        // These environment variables will be populated by the Credentials Binding plugin
-        // No need to define them here as they will be set within the withCredentials block
-    }
     stages {
         stage('Checkout') {
             steps {
@@ -48,4 +44,3 @@ pipeline {
         }
     }
 }
-
