@@ -1,8 +1,8 @@
 pipeline {
     agent any
     environment {
-        AWS_ACCESS_KEY_ID = credentials('AKIA4MTWKD7C6QGVOPEN')
-        AWS_SECRET_ACCESS_KEY = credentials('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')
+        // These environment variables will be populated by the Credentials Binding plugin
+        // No need to define them here as they will be set within the withCredentials block
     }
     stages {
         stage('Checkout') {
@@ -12,18 +12,40 @@ pipeline {
         }
         stage('Init') {
             steps {
-                sh 'terraform init'
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-credentials',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
+                    sh 'terraform init'
+                }
             }
         }
         stage('Plan') {
             steps {
-                sh 'terraform plan -out=tfplan'
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-credentials',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
+                    sh 'terraform plan -out=tfplan'
+                }
             }
         }
         stage('Apply') {
             steps {
-                sh 'terraform apply -auto-approve tfplan'
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-credentials',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
+                    sh 'terraform apply -auto-approve tfplan'
+                }
             }
         }
     }
 }
+
